@@ -4,19 +4,24 @@ from sklearn.decomposition import TruncatedSVD
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn import preprocessing
 import numpy
+from unidecode import unidecode
 
 # Loại bỏ stopwords. Stopwords là những từ không mang ý nghĩa như "và", "là", "của",...
 def remove_stopwords(data, stopwords):
 
     for i in range(len(data)):
-        text = data[i]
+        text = data[i] # Lấy dữ liệu ở dòng thứ i
         try:
-            split_words =  [x.strip('0123456789%@$.,=+-!;/()*"&^:#|\n\t\'').lower() for x in text.split()]
+            split_words =  [x.strip('0123456789%@$.,=+-!;/()*"&^:#|\n\t\'') for x in text.split()] # Tách từ trong dữ liệu và chuyển về chữ thường
         except TypeError:
-            split_words =  []
-        data[i] = ' '.join([word for word in split_words if word not in stopwords])
+            split_words =  [] # Nếu không thể tách từ thì gán split_words là một list rỗng
+        data[i] = ' '.join([word for word in split_words if word not in stopwords]) # Loại bỏ stopwords khỏi dữ liệu
         
     return data
+
+def remove_accents(text):
+    # Chuyển các ký tự có dấu thành không dấu
+    return unidecode(text)
 
 # Tiền xử lý dữ liệu
 def preprocess_data(data_path, model_path):
@@ -30,7 +35,9 @@ def preprocess_data(data_path, model_path):
         stopwords = set([w.strip() for w in f.readlines()])
 
     X_data = remove_stopwords(X_data, stopwords)
+    X_data = [remove_accents(text) for text in X_data]
     X_test = remove_stopwords(X_test, stopwords)
+    X_test = [remove_accents(text) for text in X_test]
 
     # Vector hóa dữ liệu
     tfidf_vect = TfidfVectorizer(analyzer='word', max_features=10000)

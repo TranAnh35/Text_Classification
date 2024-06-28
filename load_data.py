@@ -5,9 +5,8 @@ import os
 import argparse
 import warnings
 import re
-from unidecode import unidecode
 
-warnings.filterwarnings("ignore")
+warnings.filterwarnings("ignore") # Ẩn các cảnh báo
 
 def simple_preprocess(text):
     # Xóa các ký tự không cần thiết và chuyển về chữ thường
@@ -15,10 +14,6 @@ def simple_preprocess(text):
     text = re.sub(r'\s+', ' ', text) # Thay thế nhiều dấu cách bằng một dấu cách
     text = text.lower() # Chuyển về chữ thường
     return text
-
-def remove_accents(text):
-    # Chuyển các ký tự có dấu thành không dấu
-    return unidecode(text)
 
 def get_data(folder_path):
     data = []
@@ -36,7 +31,6 @@ def get_data(folder_path):
                         lines = f.readlines() # Đọc nội dung file
                         lines = ' '.join(lines) # Chuyển list các dòng thành một chuỗi
                         lines = simple_preprocess(lines) # Tiền xử lý dữ liệu
-                        lines = remove_accents(lines) # Tiền xử lý dữ liệu
                         lines = ViTokenizer.tokenize(lines) # Tokenize dữ liệu
                         data.append(lines) # Thêm dữ liệu vào list data
                         labels.append(path) # Thêm nhãn vào list labels
@@ -51,7 +45,7 @@ def save_data(data, labels, folder_path, filename_prefix):
         with open(os.path.join(folder_path, f'y_{filename_prefix}.pkl'), 'wb') as f: # Mở file để ghi dữ liệu dưới dạng binary
             pickle.dump(labels, f) # Ghi dữ liệu vào file
     except Exception as e:
-        print(f"Error saving {filename_prefix} data: {e}")
+        print(f"Error saving {filename_prefix} data: {e}") # In ra lỗi nếu có lỗi
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser() # Tạo một đối tượng ArgumentParser
