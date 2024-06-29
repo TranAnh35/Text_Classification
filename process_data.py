@@ -47,15 +47,6 @@ def preprocess_data(data_path, model_path):
     tfidf_X_data =  tfidf_vect.transform(X_data)
     tfidf_X_test =  tfidf_vect.transform(X_test)
 
-    # Giảm chiều dữ liệu
-    svd = TruncatedSVD(n_components=500, random_state=1998)
-    svd.fit(tfidf_X_data)
-    # Lưu selector để sử dụng sau này
-    pickle.dump(svd, open(model_path+"selector.pickle", "wb"))
-
-    tfidf_X_data_svd = svd.transform(tfidf_X_data)
-    tfidf_X_test_svd = svd.transform(tfidf_X_test)
-
     # Mã hóa nhãn dữ liệu
     encoder = preprocessing.LabelEncoder()
     y_data_one_hot = encoder.fit_transform(y_data)
@@ -63,4 +54,4 @@ def preprocess_data(data_path, model_path):
     # Lưu encoder để sử dụng sau này
     numpy.save(model_path+'classes.npy', encoder.classes_)
 
-    return tfidf_X_data_svd, y_data_one_hot, tfidf_X_test_svd, y_test_one_hot
+    return tfidf_X_data, y_data_one_hot, tfidf_X_test, y_test_one_hot

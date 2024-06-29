@@ -1,4 +1,5 @@
 data/Train_Full/**/*.txt
 data/Test_Full/**/*.txt
+data/*.pkl
 /__pycache__
 /.vscode
