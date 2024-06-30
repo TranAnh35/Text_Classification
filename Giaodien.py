@@ -45,8 +45,16 @@ def preprocess_text(text):
     return lines
 
 def detect_file_type(file_path):
-    with open(file_path, 'r', encoding='utf-8') as file:
-        content = file.read()
+    encodings = ['utf-8', 'utf-16', 'utf-32']
+    for enc in encodings:
+        try:
+            with open(file_path, 'r', encoding=enc) as file:
+                content = file.read()
+                break
+        except UnicodeDecodeError:
+            continue
+    else:
+        raise ValueError("Cannot decode the file with given encodings")
     
     processed_text = preprocess_text(content)
     tfidf_x = tfidf_vect.transform([processed_text])
