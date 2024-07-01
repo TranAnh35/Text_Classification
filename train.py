@@ -10,68 +10,58 @@ from utils import save_model
 import sys
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
-# Hàm tính toán xác suất tiên nghiệm P(class)
+# Tính toán xác suất tiên nghiệm P(class)
 def calculate_class_priors(labels):
     class_counts = defaultdict(int)
     total_count = 0
-    
+
     for label in labels:
         class_counts[label] += 1
         total_count += 1
-    
+
     priors = {cls: count / total_count for cls, count in class_counts.items()}
     return priors
 
-# Hàm tính toán xác suất có điều kiện P(word|class) với Laplace smoothing
+# Tính toán xác suất có điều kiện P(word|class) với Laplace smoothing
 def calculate_conditional_probabilities(X_train, y_train, alpha):
     class_counts = defaultdict(int)
-    word_counts = defaultdict(lambda: defaultdict(int))
-    vocabulary = set()
-    
-    for i in range(len(X_train)):
+    word_counts = defaultdict(lambda: np.zeros(X_train.shape[1]))
+
+    for i in range(X_train.shape[0]):
         document = X_train[i]
         label = y_train[i]
         class_counts[label] += 1
-        
-        for word in document.split():
-            word_counts[label][word] += 1
-            vocabulary.add(word)
-    
-    conditional_probs = defaultdict(lambda: defaultdict(float))
+        word_counts[label] += document.toarray()[0]
+
+    conditional_probs = defaultdict(lambda: np.zeros(X_train.shape[1]))
+    total_words_in_vocabulary = X_train.shape[1]
+
     for cls in class_counts:
-        total_words_in_class = sum(word_counts[cls].values())
-        total_words_in_vocabulary = len(vocabulary)
-        
-        for word in vocabulary:
-            word_count = word_counts[cls][word]
-            conditional_probs[cls][word] = (word_count + alpha) / (total_words_in_class + alpha * total_words_in_vocabulary)
-    
+        total_words_in_class = sum(word_counts[cls])
+        for j in range(total_words_in_vocabulary):
+            conditional_probs[cls][j] = (word_counts[cls][j] + alpha) / (total_words_in_class + alpha * total_words_in_vocabulary)
+
     return conditional_probs
 
-# Hàm huấn luyện mô hình Naive Bayes với Laplace smoothing
+# Huấn luyện mô hình Naive Bayes với Laplace smoothing
 def train_naive_bayes(X_train, y_train, alpha=1.0):
     class_priors = calculate_class_priors(y_train)
     conditional_probs = calculate_conditional_probabilities(X_train, y_train, alpha)
-    
-    def predict(text):
+
+    def predict(document):
         best_class = None
         best_score = float('-inf')
-        
+        document_array = document.toarray()[0]
+
         for cls in class_priors:
             score = np.log(class_priors[cls])
-            
-            for word in text.split():
-                if word in conditional_probs[cls]:
-                    score += np.log(conditional_probs[cls][word])
-                else:
-                    score += np.log(alpha / (sum(conditional_probs[cls].values()) + alpha))
-            
+            score += np.sum(np.log(conditional_probs[cls]) * document_array)
             if score > best_score:
                 best_score = score
                 best_class = cls
-        
+
         return best_class
-    
+
     return predict
 
 if __name__ == "__main__":
