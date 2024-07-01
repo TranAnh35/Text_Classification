@@ -14,7 +14,6 @@ from tkinterdnd2 import DND_FILES, TkinterDnD
 
 def simple_preprocess(text):
     text = re.sub(r'\W', ' ', text)
-    text = re.sub(r'\s+', ' ', text)
     text = text.lower()
     return text
 
@@ -67,19 +66,30 @@ def open_file_dialog():
         display_file_type(file_path)
 
 def display_file_type(file_path):
-    file_type = detect_file_type(file_path)
-    file_label.config(text=f"File Path: {file_path}")
-    type_label.config(text=f"File Type: {file_type}")
-
+    try: 
+        file_name = os.path.basename(file_path)
+        file_type = detect_file_type(file_path)
+        file_label.config(text=f"File Path: {file_path}")
+        type_label.config(text=f"File Type: {file_type}")
+        drop_area.config(text=file_name)  # Cập nhật nhãn khu vực kéo thả
+    except ValueError as e:
+        messagebox.showerror("Error", str(e))
 def on_drop(event):
     file_path = event.data.strip('{}')
     if os.path.isfile(file_path):
         display_file_type(file_path)
     else:
         messagebox.showerror("Error", "Invalid file. Please drop a valid file.")
+def reset_interface():
+    file_label.config(text="File Path: ")
+    type_label.config(text="File Type: ")
+    drop_area.config(text="Drag and drop a file here")
+def exit_application():
+    root.quit()
+
 
 root = TkinterDnD.Tk()
-root.title("File Type Detector")
+root.title("Text Classification")
 
 file_label = tk.Label(root, text="File Path: ")
 file_label.pack(pady=10)
@@ -87,11 +97,19 @@ file_label.pack(pady=10)
 type_label = tk.Label(root, text="File Type: ")
 type_label.pack(pady=10)
 
+drop_area = tk.Label(root, text="Drag and drop a file here", relief="solid", width=50, height=5)
+drop_area.pack(pady=10)
+drop_area.drop_target_register(DND_FILES)
+drop_area.dnd_bind('<<Drop>>', on_drop)
+
 browse_button = tk.Button(root, text="Browse", command=open_file_dialog)
 browse_button.pack(pady=10)
 
-root.drop_target_register(DND_FILES)
-root.dnd_bind('<<Drop>>', on_drop)
+continue_button = tk.Button(root, text="Continue", command=reset_interface)
+continue_button.pack(pady=5)
 
-root.geometry("400x200")
+exit_button = tk.Button(root, text="Exit", command=exit_application)
+exit_button.pack(pady=5)
+
+root.geometry("400x300")
 root.mainloop()
