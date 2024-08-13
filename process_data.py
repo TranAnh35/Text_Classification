@@ -55,11 +55,12 @@ def preprocess_data(data_path, model_path):
     numpy.save(model_path+'classes.npy', encoder.classes_)
 
     return tfidf_X_data, y_data_one_hot, tfidf_X_test, y_test_one_hot
+
 def save_data(tfidf_vect, encoder, tfidf_X_data, y_data_one_hot, tfidf_X_test, y_test_one_hot, model_path):
     with open(model_path + 'vectorizer.pickle', 'wb') as handle:
         pickle.dump(tfidf_vect, handle)
 
-    np.save(model_path + 'classes.npy', encoder.classes_)
+    numpy.save(model_path + 'classes.npy', encoder.classes_)
 
     with open(model_path + 'tfidf_X_data.pkl', 'wb') as handle:
         pickle.dump(tfidf_X_data, handle)
@@ -67,5 +68,5 @@ def save_data(tfidf_vect, encoder, tfidf_X_data, y_data_one_hot, tfidf_X_test, y
     with open(model_path + 'tfidf_X_test.pkl', 'wb') as handle:
         pickle.dump(tfidf_X_test, handle)
 
-    np.save(model_path + 'y_data_one_hot.npy', y_data_one_hot)
-    np.save(model_path + 'y_test_one_hot.npy', y_test_one_hot)
+    numpy.save(model_path + 'y_data_one_hot.npy', y_data_one_hot)
+    numpy.save(model_path + 'y_test_one_hot.npy', y_test_one_hot)
